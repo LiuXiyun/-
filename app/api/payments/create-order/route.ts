@@ -30,6 +30,12 @@ export async function POST(request: Request) {
     let rawPayload = "";
 
     if (channel === "ALIPAY") {
+      if (!paymentConfig.publicKey || !paymentConfig.notifyUrl) {
+        return NextResponse.json(
+          { error: "支付宝配置不完整，需要支付宝公钥和回调地址" },
+          { status: 400 },
+        );
+      }
       const result = await createAlipayOrder(
         {
           appId: paymentConfig.appId,
