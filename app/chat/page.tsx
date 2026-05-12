@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { UIMessage } from "ai";
 import Link from "next/link";
 import { ChatClient } from "@/app/chat-client";
 import { logoutUserAction } from "@/app/auth/actions";
@@ -64,7 +65,7 @@ export default async function ChatPage({ searchParams }: Props) {
     orderBy: { createdAt: "asc" },
   });
 
-  const mappedMessages = firstSessionMessages.map((item) => ({
+  const mappedMessages: UIMessage[] = firstSessionMessages.map((item) => ({
     id: item.id,
     role:
       item.role === "USER"
@@ -72,7 +73,7 @@ export default async function ChatPage({ searchParams }: Props) {
         : item.role === "ASSISTANT"
           ? ("assistant" as const)
           : ("system" as const),
-    parts: [{ type: "text", text: item.content }],
+    parts: [{ type: "text" as const, text: item.content }],
   }));
 
   const selectedPlan = params.plan
