@@ -51,7 +51,7 @@ export default async function AdminPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/" className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <Link href="/chat" className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             返回聊天页
           </Link>
           <form action={logoutAction}>
@@ -220,13 +220,38 @@ export default async function AdminPage() {
                   <input
                     name="publicKey"
                     defaultValue={current?.publicKey ?? ""}
-                    placeholder="公钥（可选）"
+                    placeholder={
+                      channel === "ALIPAY"
+                        ? "支付宝公钥（用于回调验签）"
+                        : "微信平台公钥（用于通知验签）"
+                    }
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
+                  />
+                  <input
+                    name="certSerial"
+                    defaultValue={current?.certSerial ?? ""}
+                    placeholder="微信证书序列号（微信必填）"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
+                  />
+                  <input
+                    name="apiV3Key"
+                    placeholder="微信 APIv3 Key（微信首次必填，留空不改）"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
+                  />
+                  <input
+                    name="gateway"
+                    defaultValue={current?.gateway ?? ""}
+                    placeholder={
+                      channel === "ALIPAY"
+                        ? "支付宝网关（可选，默认官方）"
+                        : "微信网关（可选，默认官方）"
+                    }
                     className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
                   />
                   <input
                     name="notifyUrl"
                     defaultValue={current?.notifyUrl ?? ""}
-                    placeholder="回调地址（可选）"
+                    placeholder="回调地址（生产建议必填）"
                     className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
                   />
                   <label className="flex items-center gap-2 text-sm">
@@ -291,16 +316,18 @@ export default async function AdminPage() {
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="px-2 py-2">订单号</th>
+                <th className="px-2 py-2">第三方单号</th>
                 <th className="px-2 py-2">渠道</th>
                 <th className="px-2 py-2">金额(元)</th>
                 <th className="px-2 py-2">状态</th>
+                <th className="px-2 py-2">支付时间</th>
                 <th className="px-2 py-2">创建时间</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 && (
                 <tr>
-                  <td className="px-2 py-2 text-slate-500" colSpan={5}>
+                  <td className="px-2 py-2 text-slate-500" colSpan={7}>
                     暂无订单
                   </td>
                 </tr>
@@ -308,9 +335,11 @@ export default async function AdminPage() {
               {orders.map((item) => (
                 <tr key={item.id} className="border-b border-slate-100">
                   <td className="px-2 py-2">{item.orderNo}</td>
+                  <td className="px-2 py-2">{item.externalOrderNo ?? "-"}</td>
                   <td className="px-2 py-2">{item.channel}</td>
                   <td className="px-2 py-2">{item.amountCny}</td>
                   <td className="px-2 py-2">{item.status}</td>
+                  <td className="px-2 py-2">{item.paidAt ? item.paidAt.toLocaleString("zh-CN") : "-"}</td>
                   <td className="px-2 py-2">{item.createdAt.toLocaleString("zh-CN")}</td>
                 </tr>
               ))}

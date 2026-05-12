@@ -40,7 +40,7 @@ export function ChatClient({ providerKeys }: Props) {
           <select
             value={providerKeyId}
             onChange={(event) => setProviderKeyId(event.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
           >
             {providerKeys.length === 0 ? (
               <option value="">请先去后台配置 Key</option>
@@ -60,12 +60,12 @@ export function ChatClient({ providerKeys }: Props) {
             value={model}
             onChange={(event) => setModel(event.target.value)}
             placeholder="例如 gpt-4.1-mini"
-            className="rounded-lg border border-slate-300 px-3 py-2"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
           />
         </label>
       </div>
 
-      <div className="h-[52vh] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <div className="h-[52vh] overflow-y-auto rounded-lg border border-slate-700 bg-slate-950/60 p-4">
         <div className="flex flex-col gap-4">
           {messages.length === 0 && (
             <p className="text-sm text-slate-500">还没有消息，输入内容后开始对话。</p>
@@ -75,7 +75,7 @@ export function ChatClient({ providerKeys }: Props) {
               <p className="text-xs font-medium text-slate-500">
                 {message.role === "user" ? "你" : "AI"}
               </p>
-              <div className="rounded-lg bg-white px-3 py-2 text-sm">
+              <div className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm">
                 {message.parts.map((part, index) =>
                   part.type === "text" ? <p key={index}>{part.text}</p> : null,
                 )}
@@ -100,7 +100,7 @@ export function ChatClient({ providerKeys }: Props) {
         }}
       >
         <input
-          className="flex-1 rounded-lg border border-slate-300 px-3 py-2"
+          className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
           placeholder="输入问题..."
           value={input}
           disabled={disabled || !providerKeyId}

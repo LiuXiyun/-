@@ -1,22 +1,39 @@
 import { OrderStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getEnabledPaymentConfig } from "@/lib/payment/config";
+import { parseWechatNotification } from "@/lib/payment/wechat";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const payload = await request.json();
-    const orderNo = payload?.out_trade_no as string | undefined;
-    const tradeState = payload?.trade_state as string | undefined;
+    const rawBody = await request.text();
+    const signature = request.headers.get("wechatpay-signature");
+    const timestamp = request.headers.get("wechatpay-timestamp");
+    const nonce = request.headers.get("wechatpay-nonce");
 
-    if (!orderNo) {
-      return NextResponse.json({ code: "FAIL", message: "缺少订单号" }, { status: 400 });
+    if (!signature || !timestamp || !nonce) {
+      return NextResponse.json({ code: "FAIL", message: "缺少微信签名头" }, { status: 400 });
     }
 
-    // TODO: 在生产环境中，必须按微信支付 v3 文档校验签名并解密通知报文。
-    if (tradeState === "SUCCESS") {
+    const config = await getEnabledPaymentConfig("WECHAT");
+    if (!config.publicKey || !config.apiV3Key) {
+      return NextResponse.json({ code: "FAIL", message: "微信配置不完整" }, { status: 400 });
+    }
+
+    const payload = parseWechatNotification(
+      rawBody,
+      { signature, timestamp, nonce },
+      { platformPublicKey: config.publicKey, apiV3Key: config.apiV3Key },
+    );
+
+    if (payload.trade_state === "SUCCESS") {
       await prisma.rechargeOrder.updateMany({
-        where: { orderNo },
-        data: { status: OrderStatus.PAID },
+        where: { orderNo: payload.out_trade_no },
+        data: {
+          status: OrderStatus.PAID,
+          externalOrderNo: payload.transaction_id,
+          paidAt: new Date(),
+        },
       });
     }
 

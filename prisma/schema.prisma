@@ -53,26 +53,31 @@ model UsageLog {
 }
 
 model PaymentConfig {
-  id                String         @id @default(cuid())
-  channel           PaymentChannel @unique
-  appId             String
-  merchantId        String?
-  encryptedKey      String
-  publicKey         String?
-  notifyUrl         String?
-  enabled           Boolean        @default(false)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id                  String         @id @default(cuid())
+  channel             PaymentChannel @unique
+  appId               String
+  merchantId          String?
+  encryptedKey        String
+  publicKey           String?
+  certSerial          String?
+  encryptedApiV3Key   String?
+  gateway             String?
+  notifyUrl           String?
+  enabled             Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 }
 
 model RechargeOrder {
-  id                String         @id @default(cuid())
-  channel           PaymentChannel
-  orderNo           String         @unique
-  amountCny         Float
-  status            OrderStatus    @default(PENDING)
-  payUrl            String?
-  externalOrderNo   String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id                 String         @id @default(cuid())
+  channel            PaymentChannel
+  orderNo            String         @unique
+  amountCny          Float
+  status             OrderStatus    @default(PENDING)
+  payUrl             String?
+  externalOrderNo    String?
+  payPayload         String?
+  paidAt             DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 }

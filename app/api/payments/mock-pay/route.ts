@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const order = await prisma.rechargeOrder.update({
       where: { orderNo },
-      data: { status: OrderStatus.PAID },
+      data: { status: OrderStatus.PAID, paidAt: new Date() },
     });
 
     return NextResponse.json({ success: true, order });

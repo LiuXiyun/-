@@ -1,9 +1,37 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "AI 聚合平台",
-  description: "多模型 + 支付 + 用量统计后台",
+  metadataBase: new URL(siteConfig.domain),
+  title: {
+    default: `${siteConfig.name}｜中文 AI 模型聚合平台`,
+    template: `%s｜${siteConfig.shortName}`,
+  },
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: `${siteConfig.name}｜中文 AI 模型聚合平台`,
+    description: siteConfig.description,
+    url: siteConfig.domain,
+    siteName: siteConfig.name,
+    locale: "zh_CN",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
 };
 
 export default function RootLayout({

@@ -95,6 +95,9 @@ export async function savePaymentConfigAction(formData: FormData) {
   const merchantId = getString(formData, "merchantId");
   const privateKey = getString(formData, "privateKey");
   const publicKey = getString(formData, "publicKey");
+  const certSerial = getString(formData, "certSerial");
+  const apiV3Key = getString(formData, "apiV3Key");
+  const gateway = getString(formData, "gateway");
   const notifyUrl = getString(formData, "notifyUrl");
   const enabled = getString(formData, "enabled") === "on";
 
@@ -115,6 +118,9 @@ export async function savePaymentConfigAction(formData: FormData) {
       merchantId: merchantId || null,
       encryptedKey: encryptText(privateKey),
       publicKey: publicKey || null,
+      certSerial: certSerial || null,
+      encryptedApiV3Key: apiV3Key ? encryptText(apiV3Key) : null,
+      gateway: gateway || null,
       notifyUrl: notifyUrl || null,
       enabled,
     },
@@ -123,6 +129,9 @@ export async function savePaymentConfigAction(formData: FormData) {
       merchantId: merchantId || null,
       ...(privateKey ? { encryptedKey: encryptText(privateKey) } : {}),
       publicKey: publicKey || null,
+      certSerial: certSerial || null,
+      ...(apiV3Key ? { encryptedApiV3Key: encryptText(apiV3Key) } : {}),
+      gateway: gateway || null,
       notifyUrl: notifyUrl || null,
       enabled,
     },
