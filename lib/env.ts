@@ -8,6 +8,9 @@ const envSchema = z.object({
   USER_SESSION_SECRET: z.string().min(16, "USER_SESSION_SECRET 至少 16 位"),
   CNY_PER_USD: z.coerce.number().positive(),
   CHAT_PRICE_MULTIPLIER: z.coerce.number().positive(),
+  REFERRAL_REBATE_RATE: z.coerce.number().min(0).max(1),
+  REFERRAL_INVITER_BONUS_CNY: z.coerce.number().min(0),
+  REFERRAL_INVITEE_BONUS_CNY: z.coerce.number().min(0),
 });
 
 export const env = envSchema.parse({
@@ -20,4 +23,7 @@ export const env = envSchema.parse({
     process.env.USER_SESSION_SECRET ?? process.env.ADMIN_SESSION_SECRET ?? "user_session_secret_32_chars",
   CNY_PER_USD: process.env.CNY_PER_USD ?? "7.2",
   CHAT_PRICE_MULTIPLIER: process.env.CHAT_PRICE_MULTIPLIER ?? "1.2",
+  REFERRAL_REBATE_RATE: process.env.REFERRAL_REBATE_RATE ?? "0.05",
+  REFERRAL_INVITER_BONUS_CNY: process.env.REFERRAL_INVITER_BONUS_CNY ?? "2",
+  REFERRAL_INVITEE_BONUS_CNY: process.env.REFERRAL_INVITEE_BONUS_CNY ?? "1",
 });

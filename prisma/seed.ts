@@ -50,6 +50,23 @@ async function main() {
       create: plan,
     });
   }
+
+  await prisma.announcement.upsert({
+    where: { slug: "launch-notice" },
+    update: {
+      title: "平台上线公告",
+      content: "欢迎使用极智 AI 中转站。你可以注册账号、充值余额并体验多模型对话。",
+      enabled: true,
+      publishedAt: new Date(),
+    },
+    create: {
+      title: "平台上线公告",
+      slug: "launch-notice",
+      content: "欢迎使用极智 AI 中转站。你可以注册账号、充值余额并体验多模型对话。",
+      enabled: true,
+      publishedAt: new Date(),
+    },
+  });
 }
 
 main()

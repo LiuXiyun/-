@@ -100,6 +100,12 @@ export default async function ChatPage({ searchParams }: Props) {
             <Link href="/dashboard" className="rounded-lg border border-slate-600 px-3 py-2">
               用户中心
             </Link>
+            <Link href="/invite" className="rounded-lg border border-slate-600 px-3 py-2">
+              邀请返佣
+            </Link>
+            <Link href="/support" className="rounded-lg border border-slate-600 px-3 py-2">
+              工单支持
+            </Link>
             <form action={logoutUserAction}>
               <button className="rounded-lg bg-slate-700 px-3 py-2">退出登录</button>
             </form>

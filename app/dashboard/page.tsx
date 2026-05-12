@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const [orders, transactions, sessions] = await Promise.all([
+  const [orders, transactions, sessions, invitedCount, openTickets] = await Promise.all([
     prisma.rechargeOrder.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -24,6 +24,8 @@ export default async function DashboardPage() {
       take: 30,
     }),
     prisma.chatSession.count({ where: { userId: user.id } }),
+    prisma.user.count({ where: { invitedById: user.id } }),
+    prisma.supportTicket.count({ where: { userId: user.id, status: { in: ["OPEN", "REPLIED"] } } }),
   ]);
 
   return (
@@ -39,6 +41,12 @@ export default async function DashboardPage() {
           <div className="flex gap-2 text-sm">
             <Link href="/chat" className="rounded-lg border border-slate-600 px-3 py-2">
               去聊天
+            </Link>
+            <Link href="/invite" className="rounded-lg border border-slate-600 px-3 py-2">
+              邀请返佣
+            </Link>
+            <Link href="/support" className="rounded-lg border border-slate-600 px-3 py-2">
+              工单支持
             </Link>
             <form action={logoutUserAction}>
               <button className="rounded-lg bg-slate-700 px-3 py-2">退出登录</button>
@@ -59,6 +67,18 @@ export default async function DashboardPage() {
         <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
           <p className="text-xs text-slate-400">会话数</p>
           <p className="mt-2 text-2xl font-semibold">{sessions}</p>
+        </article>
+        <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+          <p className="text-xs text-slate-400">已邀请用户</p>
+          <p className="mt-2 text-2xl font-semibold">{invitedCount}</p>
+        </article>
+        <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+          <p className="text-xs text-slate-400">进行中工单</p>
+          <p className="mt-2 text-2xl font-semibold">{openTickets}</p>
+        </article>
+        <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+          <p className="text-xs text-slate-400">我的邀请码</p>
+          <p className="mt-2 text-2xl font-semibold text-cyan-300">{user.inviteCode}</p>
         </article>
       </section>
 

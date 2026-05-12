@@ -16,7 +16,7 @@ export async function debitForChat(params: {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: params.userId },
-      select: { id: true, balanceCny: true },
+      select: { id: true, balanceCny: true, invitedById: true, rebateRate: true },
     });
     if (!user) {
       throw new Error("用户不存在");
@@ -43,6 +43,33 @@ export async function debitForChat(params: {
         referenceId: params.usageLogId,
       },
     });
+
+    if (user.invitedById) {
+      const rebate = Number((params.amountCny * user.rebateRate).toFixed(6));
+      if (rebate > 0) {
+        const inviter = await tx.user.findUnique({
+          where: { id: user.invitedById },
+          select: { id: true, balanceCny: true },
+        });
+        if (inviter) {
+          const inviterNext = Number((inviter.balanceCny + rebate).toFixed(6));
+          await tx.user.update({
+            where: { id: inviter.id },
+            data: { balanceCny: inviterNext },
+          });
+          await tx.walletTransaction.create({
+            data: {
+              userId: inviter.id,
+              type: "REFERRAL_BONUS",
+              amountCny: rebate,
+              balanceAfterCny: inviterNext,
+              note: `下级消费返佣（来源用户 ${user.id}）`,
+              referenceId: params.usageLogId,
+            },
+          });
+        }
+      }
+    }
 
     return updatedUser;
   });

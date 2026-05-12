@@ -13,6 +13,14 @@ function getString(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+}
+
 export async function loginAction(formData: FormData) {
   const password = getString(formData, "password");
   const ok = await createAdminSession(password);
@@ -216,4 +224,64 @@ export async function savePlanAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/pricing");
+}
+
+export async function replySupportTicketAction(formData: FormData) {
+  await requireAdmin();
+  const ticketId = getString(formData, "ticketId");
+  const adminReply = getString(formData, "adminReply");
+  const status = getString(formData, "status");
+  if (!ticketId || !adminReply) {
+    return;
+  }
+
+  await prisma.supportTicket.update({
+    where: { id: ticketId },
+    data: {
+      adminReply,
+      status: status === "CLOSED" ? "CLOSED" : "REPLIED",
+    },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/support");
+}
+
+export async function saveAnnouncementAction(formData: FormData) {
+  await requireAdmin();
+  const id = getString(formData, "id");
+  const title = getString(formData, "title");
+  const slugInput = getString(formData, "slug");
+  const content = getString(formData, "content");
+  const enabled = getString(formData, "enabled") === "on";
+  if (!title || !content) {
+    return;
+  }
+  const slug = slugify(slugInput || title);
+  const publishedAt = enabled ? new Date() : null;
+
+  if (id) {
+    await prisma.announcement.update({
+      where: { id },
+      data: { title, slug, content, enabled, publishedAt },
+    });
+  } else {
+    await prisma.announcement.create({
+      data: { title, slug, content, enabled, publishedAt },
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/announcements");
+}
+
+export async function deleteAnnouncementAction(formData: FormData) {
+  await requireAdmin();
+  const id = getString(formData, "id");
+  if (!id) {
+    return;
+  }
+  await prisma.announcement.delete({ where: { id } });
+  revalidatePath("/admin");
+  revalidatePath("/announcements");
 }

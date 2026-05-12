@@ -6,10 +6,25 @@ import { getEnabledPaymentConfig } from "@/lib/payment/config";
 import { buildOrderNo } from "@/lib/payment/shared";
 import { createWechatNativeOrder } from "@/lib/payment/wechat";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { validateRechargeAmount } from "@/lib/risk-control";
 import { getCurrentUser } from "@/lib/user-auth";
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const limiter = checkRateLimit({
+      key: `pay-order:${ip}`,
+      limit: 8,
+      windowMs: 60 * 1000,
+    });
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: "下单过于频繁，请稍后再试" },
+        { status: 429, headers: { "Retry-After": Math.ceil(limiter.retryAfterMs / 1000).toString() } },
+      );
+    }
+
     const user = await getCurrentUser();
     const isAdmin = await isAdminAuthenticated();
 
@@ -31,6 +46,10 @@ export async function POST(request: Request) {
 
     if (!channel || !amountCny || amountCny <= 0) {
       return NextResponse.json({ error: "请传入正确的支付渠道和金额" }, { status: 400 });
+    }
+    const amountValidation = validateRechargeAmount(amountCny);
+    if (!amountValidation.valid) {
+      return NextResponse.json({ error: amountValidation.reason }, { status: 400 });
     }
 
     const paymentConfig = await getEnabledPaymentConfig(channel);

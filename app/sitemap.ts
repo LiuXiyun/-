@@ -36,6 +36,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.75,
     },
+    {
+      url: `${base}/cases`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.75,
+    },
+    {
+      url: `${base}/help`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.75,
+    },
+    {
+      url: `${base}/announcements`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.75,
+    },
   ];
 
   const geoPages: MetadataRoute.Sitemap = geoCities.map((city) => ({

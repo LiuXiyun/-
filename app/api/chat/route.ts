@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { debitForChat, usdToCny } from "@/lib/billing";
 import { DEFAULT_MODEL_BY_PROVIDER, createLanguageModel, estimateCostUsd } from "@/lib/model-provider";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { assessPromptRisk } from "@/lib/risk-control";
 import { getCurrentUser } from "@/lib/user-auth";
 
 export const maxDuration = 30;
@@ -22,6 +24,19 @@ function pickLatestUserText(messages: UIMessage[]) {
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const limiter = checkRateLimit({
+      key: `chat:${ip}`,
+      limit: 25,
+      windowMs: 60 * 1000,
+    });
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: "请求太频繁，请稍后再试" },
+        { status: 429, headers: { "Retry-After": Math.ceil(limiter.retryAfterMs / 1000).toString() } },
+      );
+    }
+
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "请先登录后再对话" }, { status: 401 });
@@ -75,6 +90,10 @@ export async function POST(request: Request) {
     const modelId = model?.trim() || DEFAULT_MODEL_BY_PROVIDER[providerKey.provider];
     const languageModel = createLanguageModel(providerKey, modelId);
     const latestUserText = pickLatestUserText(messages);
+    const riskResult = assessPromptRisk(latestUserText);
+    if (riskResult.blocked) {
+      return NextResponse.json({ error: riskResult.reason }, { status: 400 });
+    }
 
     if (latestUserText) {
       await prisma.chatMessage.create({

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; inviter?: string }>;
 };
 
 export default async function RegisterPage({ searchParams }: Props) {
@@ -48,6 +48,13 @@ export default async function RegisterPage({ searchParams }: Props) {
             name="confirmPassword"
             required
             placeholder="确认密码"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
+          />
+          <input
+            type="text"
+            name="inviteCode"
+            defaultValue={params.inviter ?? ""}
+            placeholder="邀请码（可选）"
             className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
           />
           <button className="rounded-lg bg-cyan-500 px-4 py-2 font-medium text-slate-950">注册并进入</button>

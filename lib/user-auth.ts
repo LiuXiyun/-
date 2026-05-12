@@ -79,6 +79,8 @@ export async function getCurrentUser() {
       id: true,
       email: true,
       displayName: true,
+      inviteCode: true,
+      invitedById: true,
       balanceCny: true,
       role: true,
       createdAt: true,

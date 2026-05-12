@@ -71,7 +71,9 @@ export default function HomePage() {
           <nav className="flex items-center gap-3 text-sm text-slate-300">
             <Link href="/models">模型</Link>
             <Link href="/pricing">价格</Link>
+            <Link href="/cases">案例</Link>
             <Link href="/tutorials">教程</Link>
+            <Link href="/help">帮助</Link>
             <Link href="/chat">体验</Link>
             <Link href="/login">登录</Link>
           </nav>

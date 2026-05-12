@@ -3,7 +3,10 @@ import { PaymentChannel } from "@prisma/client";
 import {
   adjustUserBalanceAction,
   deleteProviderKeyAction,
+  deleteAnnouncementAction,
   logoutAction,
+  replySupportTicketAction,
+  saveAnnouncementAction,
   savePlanAction,
   savePaymentConfigAction,
   saveProviderKeyAction,
@@ -19,7 +22,7 @@ function usd(cost: number) {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [providerKeys, usageLogs, paymentConfigs, orders, users, plans] = await Promise.all([
+  const [providerKeys, usageLogs, paymentConfigs, orders, users, plans, tickets, announcements] = await Promise.all([
     prisma.modelProviderKey.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.usageLog.findMany({
       orderBy: { createdAt: "desc" },
@@ -42,6 +45,12 @@ export default async function AdminPage() {
       select: { id: true, email: true, displayName: true, balanceCny: true, createdAt: true },
     }),
     prisma.plan.findMany({ orderBy: { priceCny: "asc" } }),
+    prisma.supportTicket.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 40,
+      include: { user: { select: { email: true, displayName: true } } },
+    }),
+    prisma.announcement.findMany({ orderBy: { updatedAt: "desc" }, take: 30 }),
   ]);
 
   const usageSummary = usageLogs.reduce(
@@ -469,6 +478,100 @@ export default async function AdminPage() {
                 className="rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-5"
               />
             </form>
+          ))}
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold">工单处理</h2>
+        <div className="mt-3 flex flex-col gap-3">
+          {tickets.length === 0 && <p className="text-sm text-slate-500">暂无工单</p>}
+          {tickets.map((ticket) => (
+            <article key={ticket.id} className="rounded border border-slate-200 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-medium">
+                  {ticket.subject}（{ticket.user.displayName || ticket.user.email}）
+                </p>
+                <span className="text-xs text-slate-500">{ticket.status}</span>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{ticket.content}</p>
+              <form action={replySupportTicketAction} className="mt-2 flex flex-col gap-2">
+                <input type="hidden" name="ticketId" value={ticket.id} />
+                <textarea
+                  name="adminReply"
+                  defaultValue={ticket.adminReply ?? ""}
+                  placeholder="请输入回复"
+                  rows={3}
+                  className="rounded border border-slate-300 px-2 py-1 text-sm"
+                  required
+                />
+                <div className="flex items-center gap-2">
+                  <select name="status" defaultValue={ticket.status} className="rounded border border-slate-300 px-2 py-1 text-sm">
+                    <option value="REPLIED">REPLIED</option>
+                    <option value="CLOSED">CLOSED</option>
+                  </select>
+                  <button className="rounded border border-slate-300 px-3 py-1 text-sm">保存回复</button>
+                </div>
+              </form>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold">公告管理</h2>
+        <form action={saveAnnouncementAction} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <input name="title" placeholder="公告标题" className="rounded border border-slate-300 px-3 py-2 text-sm" />
+          <input name="slug" placeholder="slug（可选）" className="rounded border border-slate-300 px-3 py-2 text-sm" />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="enabled" defaultChecked />
+            发布
+          </label>
+          <textarea
+            name="content"
+            placeholder="公告内容"
+            rows={4}
+            className="rounded border border-slate-300 px-3 py-2 text-sm sm:col-span-3"
+          />
+          <button className="rounded border border-slate-300 px-3 py-2 text-sm sm:col-span-3">发布公告</button>
+        </form>
+
+        <div className="mt-3 flex flex-col gap-2">
+          {announcements.map((announcement) => (
+            <div key={announcement.id} className="rounded border border-slate-200 p-3">
+              <form action={saveAnnouncementAction} className="grid grid-cols-1 gap-2">
+                <input type="hidden" name="id" value={announcement.id} />
+                <input
+                  name="title"
+                  defaultValue={announcement.title}
+                  className="rounded border border-slate-300 px-2 py-1 text-sm"
+                />
+                <input
+                  name="slug"
+                  defaultValue={announcement.slug}
+                  className="rounded border border-slate-300 px-2 py-1 text-sm"
+                />
+                <textarea
+                  name="content"
+                  defaultValue={announcement.content}
+                  rows={3}
+                  className="rounded border border-slate-300 px-2 py-1 text-sm"
+                />
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-1 text-xs">
+                    <input type="checkbox" name="enabled" defaultChecked={announcement.enabled} />
+                    发布
+                  </label>
+                  <button className="rounded border border-slate-300 px-2 py-1 text-xs">更新</button>
+                </div>
+              </form>
+              <form action={deleteAnnouncementAction} className="mt-2">
+                <input type="hidden" name="id" value={announcement.id} />
+                <button className="rounded border border-rose-300 px-2 py-1 text-xs text-rose-600">
+                  删除公告
+                </button>
+              </form>
+            </div>
           ))}
         </div>
       </section>
