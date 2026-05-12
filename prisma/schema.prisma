@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ModelProviderType {
+  OPENAI
+  ANTHROPIC
+  GOOGLE
+  CUSTOM
+}
+
+enum PaymentChannel {
+  ALIPAY
+  WECHAT
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model ModelProviderKey {
+  id             String            @id @default(cuid())
+  name           String
+  provider       ModelProviderType
+  encryptedKey   String
+  baseUrl        String?
+  note           String?
+  enabled        Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  usageLogs      UsageLog[]
+}
+
+model UsageLog {
+  id                String           @id @default(cuid())
+  providerKeyId     String?
+  providerKey       ModelProviderKey? @relation(fields: [providerKeyId], references: [id], onDelete: SetNull)
+  provider          ModelProviderType
+  model             String
+  requestId         String?
+  promptTokens      Int              @default(0)
+  completionTokens  Int              @default(0)
+  totalTokens       Int              @default(0)
+  estimatedCostUsd  Float            @default(0)
+  createdAt         DateTime         @default(now())
+}
+
+model PaymentConfig {
+  id                String         @id @default(cuid())
+  channel           PaymentChannel @unique
+  appId             String
+  merchantId        String?
+  encryptedKey      String
+  publicKey         String?
+  notifyUrl         String?
+  enabled           Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model RechargeOrder {
+  id                String         @id @default(cuid())
+  channel           PaymentChannel
+  orderNo           String         @unique
+  amountCny         Float
+  status            OrderStatus    @default(PENDING)
+  payUrl            String?
+  externalOrderNo   String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
