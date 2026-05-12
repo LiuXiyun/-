@@ -25,6 +25,47 @@ enum OrderStatus {
   FAILED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum WalletTransactionType {
+  TOPUP
+  CHAT_DEBIT
+  PLAN_PURCHASE
+  ADJUSTMENT
+  REFUND
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  passwordHash        String
+  displayName         String
+  role                UserRole            @default(USER)
+  balanceCny          Float               @default(0)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  usageLogs           UsageLog[]
+  orders              RechargeOrder[]
+  walletTransactions  WalletTransaction[]
+  chatSessions        ChatSession[]
+  subscriptions       UserSubscription[]
+}
+
 model ModelProviderKey {
   id             String            @id @default(cuid())
   name           String
@@ -40,6 +81,10 @@ model ModelProviderKey {
 
 model UsageLog {
   id                String           @id @default(cuid())
+  userId            String?
+  user              User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chatSessionId     String?
+  chatSession       ChatSession?     @relation(fields: [chatSessionId], references: [id], onDelete: SetNull)
   providerKeyId     String?
   providerKey       ModelProviderKey? @relation(fields: [providerKeyId], references: [id], onDelete: SetNull)
   provider          ModelProviderType
@@ -70,6 +115,8 @@ model PaymentConfig {
 
 model RechargeOrder {
   id                 String         @id @default(cuid())
+  userId             String
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   channel            PaymentChannel
   orderNo            String         @unique
   amountCny          Float
@@ -80,4 +127,67 @@ model RechargeOrder {
   paidAt             DateTime?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
+}
+
+model WalletTransaction {
+  id              String                @id @default(cuid())
+  userId          String
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            WalletTransactionType
+  amountCny       Float
+  balanceAfterCny Float
+  note            String
+  referenceId     String?
+  createdAt       DateTime              @default(now())
+}
+
+model ChatSession {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  messages      ChatMessage[]
+  usageLogs     UsageLog[]
+}
+
+model ChatMessage {
+  id            String          @id @default(cuid())
+  sessionId     String
+  session       ChatSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role          ChatMessageRole
+  content       String
+  model         String?
+  promptTokens  Int             @default(0)
+  outputTokens  Int             @default(0)
+  totalTokens   Int             @default(0)
+  costUsd       Float           @default(0)
+  createdAt     DateTime        @default(now())
+}
+
+model Plan {
+  id            String             @id @default(cuid())
+  name          String
+  slug          String             @unique
+  priceCny      Float
+  creditsCny    Float
+  description   String
+  enabled       Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  subscriptions UserSubscription[]
+}
+
+model UserSubscription {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId        String
+  plan          Plan               @relation(fields: [planId], references: [id], onDelete: Restrict)
+  status        SubscriptionStatus @default(ACTIVE)
+  startsAt      DateTime           @default(now())
+  expiresAt     DateTime
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 }

@@ -18,6 +18,38 @@ async function main() {
       },
     });
   }
+
+  const plans = [
+    {
+      name: "体验包",
+      slug: "starter",
+      priceCny: 19.9,
+      creditsCny: 25,
+      description: "适合个人体验和小规模测试",
+    },
+    {
+      name: "开发者包",
+      slug: "pro",
+      priceCny: 99,
+      creditsCny: 130,
+      description: "适合持续开发和中等流量项目",
+    },
+    {
+      name: "团队包",
+      slug: "team",
+      priceCny: 299,
+      creditsCny: 420,
+      description: "适合团队协作和高频调用场景",
+    },
+  ] as const;
+
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { slug: plan.slug },
+      update: plan,
+      create: plan,
+    });
+  }
 }
 
 main()

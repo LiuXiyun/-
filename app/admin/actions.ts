@@ -4,6 +4,7 @@ import { PaymentChannel, Prisma, ModelProviderType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminSession, clearAdminSession, requireAdmin } from "@/lib/admin-auth";
+import { creditTopup } from "@/lib/billing";
 import { encryptText } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
 
@@ -138,4 +139,81 @@ export async function savePaymentConfigAction(formData: FormData) {
   });
 
   revalidatePath("/admin");
+}
+
+export async function adjustUserBalanceAction(formData: FormData) {
+  await requireAdmin();
+
+  const userId = getString(formData, "userId");
+  const amountValue = Number(getString(formData, "amount"));
+  const note = getString(formData, "note") || "管理员调整余额";
+  if (!userId || Number.isNaN(amountValue) || amountValue === 0) {
+    return;
+  }
+
+  if (amountValue > 0) {
+    await creditTopup({
+      userId,
+      amountCny: amountValue,
+      note,
+    });
+  } else {
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { id: true, balanceCny: true },
+      });
+      if (!user) {
+        return;
+      }
+      const nextBalance = Number((user.balanceCny + amountValue).toFixed(6));
+      await tx.user.update({
+        where: { id: user.id },
+        data: { balanceCny: nextBalance },
+      });
+      await tx.walletTransaction.create({
+        data: {
+          userId: user.id,
+          type: "ADJUSTMENT",
+          amountCny: amountValue,
+          balanceAfterCny: nextBalance,
+          note,
+        },
+      });
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  revalidatePath("/chat");
+}
+
+export async function savePlanAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = getString(formData, "id");
+  const name = getString(formData, "name");
+  const slug = getString(formData, "slug");
+  const description = getString(formData, "description");
+  const priceCny = Number(getString(formData, "priceCny"));
+  const creditsCny = Number(getString(formData, "creditsCny"));
+  const enabled = getString(formData, "enabled") === "on";
+
+  if (!name || !slug || Number.isNaN(priceCny) || Number.isNaN(creditsCny)) {
+    return;
+  }
+
+  if (id) {
+    await prisma.plan.update({
+      where: { id },
+      data: { name, slug, description, priceCny, creditsCny, enabled },
+    });
+  } else {
+    await prisma.plan.create({
+      data: { name, slug, description, priceCny, creditsCny, enabled },
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/pricing");
 }

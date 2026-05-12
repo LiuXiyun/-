@@ -71,8 +71,9 @@ export default function HomePage() {
           <nav className="flex items-center gap-3 text-sm text-slate-300">
             <Link href="/models">模型</Link>
             <Link href="/pricing">价格</Link>
+            <Link href="/tutorials">教程</Link>
             <Link href="/chat">体验</Link>
-            <Link href="/admin/login">后台</Link>
+            <Link href="/login">登录</Link>
           </nav>
         </header>
 
@@ -93,16 +94,16 @@ export default function HomePage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                href="/chat"
+                href="/register"
                 className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3 text-sm font-medium text-slate-950"
               >
-                立即开始对话
+                免费注册并开始
               </Link>
               <Link
-                href="/admin/login"
+                href="/login"
                 className="rounded-xl border border-slate-600 px-5 py-3 text-sm font-medium text-slate-200"
               >
-                进入后台配置
+                账号登录
               </Link>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { OrderStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { creditTopup } from "@/lib/billing";
 import { verifyAlipaySignature } from "@/lib/payment/alipay";
 import { getEnabledPaymentConfig } from "@/lib/payment/config";
 import { prisma } from "@/lib/prisma";
@@ -36,13 +37,31 @@ export async function POST(request: Request) {
     }
 
     if (tradeStatus === "TRADE_SUCCESS" || tradeStatus === "TRADE_FINISHED") {
-      await prisma.rechargeOrder.updateMany({
-        where: { orderNo },
-        data: {
-          status: OrderStatus.PAID,
-          externalOrderNo: params.trade_no || orderNo,
-          paidAt: new Date(),
-        },
+      await prisma.$transaction(async (tx) => {
+        const order = await tx.rechargeOrder.findUnique({
+          where: { orderNo },
+          select: { id: true, status: true, userId: true, amountCny: true },
+        });
+        if (!order || order.status === "PAID") {
+          return;
+        }
+
+        await tx.rechargeOrder.update({
+          where: { id: order.id },
+          data: {
+            status: OrderStatus.PAID,
+            externalOrderNo: params.trade_no || orderNo,
+            paidAt: new Date(),
+          },
+        });
+
+        await creditTopup({
+          userId: order.userId,
+          amountCny: order.amountCny,
+          note: `支付宝充值到账（订单 ${orderNo}）`,
+          referenceId: order.id,
+          tx,
+        });
       });
     }
 

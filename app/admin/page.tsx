@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { PaymentChannel } from "@prisma/client";
 import {
+  adjustUserBalanceAction,
   deleteProviderKeyAction,
   logoutAction,
+  savePlanAction,
   savePaymentConfigAction,
   saveProviderKeyAction,
 } from "@/app/admin/actions";
@@ -17,7 +19,7 @@ function usd(cost: number) {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [providerKeys, usageLogs, paymentConfigs, orders] = await Promise.all([
+  const [providerKeys, usageLogs, paymentConfigs, orders, users, plans] = await Promise.all([
     prisma.modelProviderKey.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.usageLog.findMany({
       orderBy: { createdAt: "desc" },
@@ -29,7 +31,17 @@ export default async function AdminPage() {
       },
     }),
     prisma.paymentConfig.findMany({ orderBy: { updatedAt: "desc" } }),
-    prisma.rechargeOrder.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
+    prisma.rechargeOrder.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      include: { user: { select: { email: true, displayName: true } } },
+    }),
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      select: { id: true, email: true, displayName: true, balanceCny: true, createdAt: true },
+    }),
+    prisma.plan.findMany({ orderBy: { priceCny: "asc" } }),
   ]);
 
   const usageSummary = usageLogs.reduce(
@@ -316,6 +328,7 @@ export default async function AdminPage() {
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="px-2 py-2">订单号</th>
+                <th className="px-2 py-2">用户</th>
                 <th className="px-2 py-2">第三方单号</th>
                 <th className="px-2 py-2">渠道</th>
                 <th className="px-2 py-2">金额(元)</th>
@@ -327,7 +340,7 @@ export default async function AdminPage() {
             <tbody>
               {orders.length === 0 && (
                 <tr>
-                  <td className="px-2 py-2 text-slate-500" colSpan={7}>
+                  <td className="px-2 py-2 text-slate-500" colSpan={8}>
                     暂无订单
                   </td>
                 </tr>
@@ -335,6 +348,7 @@ export default async function AdminPage() {
               {orders.map((item) => (
                 <tr key={item.id} className="border-b border-slate-100">
                   <td className="px-2 py-2">{item.orderNo}</td>
+                  <td className="px-2 py-2">{item.user.displayName || item.user.email}</td>
                   <td className="px-2 py-2">{item.externalOrderNo ?? "-"}</td>
                   <td className="px-2 py-2">{item.channel}</td>
                   <td className="px-2 py-2">{item.amountCny}</td>
@@ -345,6 +359,117 @@ export default async function AdminPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold">用户账户管理</h2>
+        <div className="mt-3 overflow-x-auto">
+          <table className="min-w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500">
+                <th className="px-2 py-2">用户</th>
+                <th className="px-2 py-2">邮箱</th>
+                <th className="px-2 py-2">余额</th>
+                <th className="px-2 py-2">注册时间</th>
+                <th className="px-2 py-2">调整余额</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 && (
+                <tr>
+                  <td className="px-2 py-2 text-slate-500" colSpan={5}>
+                    暂无用户
+                  </td>
+                </tr>
+              )}
+              {users.map((user) => (
+                <tr key={user.id} className="border-b border-slate-100 align-top">
+                  <td className="px-2 py-2">{user.displayName}</td>
+                  <td className="px-2 py-2">{user.email}</td>
+                  <td className="px-2 py-2">¥{user.balanceCny.toFixed(2)}</td>
+                  <td className="px-2 py-2">{user.createdAt.toLocaleString("zh-CN")}</td>
+                  <td className="px-2 py-2">
+                    <form action={adjustUserBalanceAction} className="flex flex-wrap items-center gap-2">
+                      <input type="hidden" name="userId" value={user.id} />
+                      <input
+                        name="amount"
+                        placeholder="+20 或 -5"
+                        className="w-24 rounded border border-slate-300 px-2 py-1"
+                        required
+                      />
+                      <input
+                        name="note"
+                        placeholder="备注"
+                        className="w-32 rounded border border-slate-300 px-2 py-1"
+                      />
+                      <button className="rounded border border-slate-300 px-2 py-1">执行</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 className="text-lg font-semibold">套餐管理</h2>
+        <form action={savePlanAction} className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <input name="name" placeholder="套餐名" className="rounded border border-slate-300 px-3 py-2 text-sm" />
+          <input name="slug" placeholder="slug（唯一）" className="rounded border border-slate-300 px-3 py-2 text-sm" />
+          <input
+            name="description"
+            placeholder="描述"
+            className="rounded border border-slate-300 px-3 py-2 text-sm sm:col-span-3"
+          />
+          <input name="priceCny" placeholder="售价" className="rounded border border-slate-300 px-3 py-2 text-sm" />
+          <input
+            name="creditsCny"
+            placeholder="到账额度"
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="enabled" defaultChecked />
+            启用
+          </label>
+          <button className="rounded border border-slate-300 px-3 py-2 text-sm">新增套餐</button>
+        </form>
+
+        <div className="mt-3 flex flex-col gap-2">
+          {plans.map((plan) => (
+            <form
+              key={plan.id}
+              action={savePlanAction}
+              className="grid grid-cols-1 gap-2 rounded border border-slate-200 p-2 sm:grid-cols-5"
+            >
+              <input type="hidden" name="id" value={plan.id} />
+              <input name="name" defaultValue={plan.name} className="rounded border border-slate-300 px-2 py-1 text-sm" />
+              <input name="slug" defaultValue={plan.slug} className="rounded border border-slate-300 px-2 py-1 text-sm" />
+              <input
+                name="priceCny"
+                defaultValue={plan.priceCny}
+                className="rounded border border-slate-300 px-2 py-1 text-sm"
+              />
+              <input
+                name="creditsCny"
+                defaultValue={plan.creditsCny}
+                className="rounded border border-slate-300 px-2 py-1 text-sm"
+              />
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1 text-xs">
+                  <input type="checkbox" name="enabled" defaultChecked={plan.enabled} />
+                  启用
+                </label>
+                <button className="rounded border border-slate-300 px-2 py-1 text-xs">更新</button>
+              </div>
+              <input
+                name="description"
+                defaultValue={plan.description}
+                className="rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-5"
+              />
+            </form>
+          ))}
         </div>
       </section>
     </main>

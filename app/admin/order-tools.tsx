@@ -10,6 +10,7 @@ export function OrderTools({ defaultChannel }: Props) {
   const [channel, setChannel] = useState<"ALIPAY" | "WECHAT">(defaultChannel);
   const [amount, setAmount] = useState("9.9");
   const [subject, setSubject] = useState("AI 充值测试");
+  const [userId, setUserId] = useState("");
   const [lastOrderNo, setLastOrderNo] = useState("");
   const [lastPayUrl, setLastPayUrl] = useState("");
   const [message, setMessage] = useState("");
@@ -26,6 +27,7 @@ export function OrderTools({ defaultChannel }: Props) {
           channel,
           amountCny: Number(amount),
           subject,
+          userId: userId || undefined,
         }),
       });
       const payload = await response.json();
@@ -73,7 +75,7 @@ export function OrderTools({ defaultChannel }: Props) {
     <div className="rounded-lg border border-slate-200 p-3">
       <h3 className="text-sm font-semibold">订单联调工具（开发环境）</h3>
       <p className="mt-1 text-xs text-slate-500">真实支付前先用它自测下单和回调链路。</p>
-      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-5">
         <select
           value={channel}
           onChange={(event) => setChannel(event.target.value as "ALIPAY" | "WECHAT")}
@@ -93,6 +95,12 @@ export function OrderTools({ defaultChannel }: Props) {
           onChange={(event) => setSubject(event.target.value)}
           className="rounded-lg border border-slate-300 px-2 py-2 text-sm"
           placeholder="订单标题"
+        />
+        <input
+          value={userId}
+          onChange={(event) => setUserId(event.target.value)}
+          className="rounded-lg border border-slate-300 px-2 py-2 text-sm"
+          placeholder="用户ID（管理员可选填）"
         />
         <button
           type="button"

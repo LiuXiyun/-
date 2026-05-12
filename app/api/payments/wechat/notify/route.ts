@@ -1,5 +1,6 @@
 import { OrderStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { creditTopup } from "@/lib/billing";
 import { getEnabledPaymentConfig } from "@/lib/payment/config";
 import { parseWechatNotification } from "@/lib/payment/wechat";
 import { prisma } from "@/lib/prisma";
@@ -27,13 +28,31 @@ export async function POST(request: Request) {
     );
 
     if (payload.trade_state === "SUCCESS") {
-      await prisma.rechargeOrder.updateMany({
-        where: { orderNo: payload.out_trade_no },
-        data: {
-          status: OrderStatus.PAID,
-          externalOrderNo: payload.transaction_id,
-          paidAt: new Date(),
-        },
+      await prisma.$transaction(async (tx) => {
+        const order = await tx.rechargeOrder.findUnique({
+          where: { orderNo: payload.out_trade_no },
+          select: { id: true, status: true, userId: true, amountCny: true },
+        });
+        if (!order || order.status === "PAID") {
+          return;
+        }
+
+        await tx.rechargeOrder.update({
+          where: { id: order.id },
+          data: {
+            status: OrderStatus.PAID,
+            externalOrderNo: payload.transaction_id,
+            paidAt: new Date(),
+          },
+        });
+
+        await creditTopup({
+          userId: order.userId,
+          amountCny: order.amountCny,
+          note: `微信充值到账（订单 ${payload.out_trade_no}）`,
+          referenceId: order.id,
+          tx,
+        });
       });
     }
 

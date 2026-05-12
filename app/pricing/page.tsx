@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "价格与计费说明",
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const plans = await prisma.plan.findMany({
+    where: { enabled: true },
+    orderBy: { priceCny: "asc" },
+  });
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8 text-slate-100">
       <header className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
@@ -20,27 +26,24 @@ export default function PricingPage() {
       </header>
 
       <section className="mt-4 grid gap-4 md:grid-cols-3">
-        {[
-          {
-            name: "免费试用",
-            price: "¥0",
-            desc: "本地部署体验全部流程，适合功能验证。",
-          },
-          {
-            name: "标准版",
-            price: "按量付费",
-            desc: "按模型真实调用成本计费，支持充值运营。",
-          },
-          {
-            name: "企业版",
-            price: "定制",
-            desc: "支持私有化网关、专属风控与多租户能力。",
-          },
-        ].map((plan) => (
+        {plans.length === 0 && (
+          <article className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 md:col-span-3">
+            <h2 className="text-lg font-medium">暂无套餐数据</h2>
+            <p className="mt-2 text-sm text-slate-300">请先到管理员后台创建套餐后再展示。</p>
+          </article>
+        )}
+        {plans.map((plan) => (
           <article key={plan.name} className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5">
             <h2 className="text-lg font-medium">{plan.name}</h2>
-            <p className="mt-2 text-2xl font-semibold text-cyan-300">{plan.price}</p>
-            <p className="mt-2 text-sm text-slate-300">{plan.desc}</p>
+            <p className="mt-2 text-2xl font-semibold text-cyan-300">¥{plan.priceCny.toFixed(2)}</p>
+            <p className="mt-2 text-sm text-slate-300">{plan.description}</p>
+            <p className="mt-1 text-xs text-slate-400">到账额度：¥{plan.creditsCny.toFixed(2)}</p>
+            <Link
+              href={`/chat?plan=${plan.slug}`}
+              className="mt-3 inline-flex rounded-lg border border-cyan-400/60 px-3 py-2 text-xs text-cyan-300"
+            >
+              选择此套餐
+            </Link>
           </article>
         ))}
       </section>
