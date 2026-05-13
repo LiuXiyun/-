@@ -1,0 +1,16 @@
+.next
+node_modules
+.env
+.env.local
+*.log
+dist
+coverage
+dev.db
+dev.db-journal
+prisma/dev.db
+prisma/dev.db-journal
+
+# Playwright MCP 与本地截图（勿提交）
+.playwright-mcp/
+home-shot.png
+[0-9][0-9]-*.png
