@@ -3,9 +3,9 @@ import Link from "next/link";
 import { geoCities, siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "中文 AI 模型聚合平台",
+  title: "AI 智能编程助手",
   description:
-    "一键接入 OpenAI、Claude、Gemini。支持支付宝/微信支付、实时 Token 消耗统计，适合中文业务快速上线。",
+    "为中国开发者打造的 AI 编程助手：代码生成、调试优化、团队协作。配套官网营销、用户账户与运营后台，支持商业化支付与用量统计。",
 };
 
 export default function HomePage() {
@@ -15,26 +15,26 @@ export default function HomePage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "这个平台可以接入哪些大模型？",
+        name: "这个产品是做什么的？",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "支持 OpenAI、Anthropic Claude、Google Gemini，也支持兼容 OpenAI 协议的自定义网关。",
+          text: "面向中国开发者的智能编程助手，帮助完成代码生成、调试优化与团队协作，并提供官网、账户体系与运营后台。",
         },
       },
       {
         "@type": "Question",
-        name: "是否支持中文支付方式？",
+        name: "如何开始使用？",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "支持支付宝与微信支付，包含真实下单与回调验签流程，可用于中国市场商业化。",
+          text: "注册账户后可进入用户中心管理充值与订单；产品侧接入（IDE/插件/客户端）可按文档集成。",
         },
       },
       {
         "@type": "Question",
-        name: "后台能看到 Key 的消耗吗？",
+        name: "是否支持中文支付与运营数据？",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "后台可查看每次请求的输入/输出/总 Token，以及按模型估算的成本。",
+          text: "支持支付宝与微信支付；后台可查看订单、用户余额与模型调用消耗统计，便于商业化运营。",
         },
       },
     ],
@@ -44,9 +44,10 @@ export default function HomePage() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: siteConfig.name,
-    applicationCategory: "BusinessApplication",
+    applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
-    description: siteConfig.description,
+    description:
+      "AI 驱动的编程助手：代码生成、调试优化、实时协作。配套中文营销站、用户账户与运营后台。",
     offers: {
       "@type": "Offer",
       priceCurrency: "CNY",
@@ -66,120 +67,154 @@ export default function HomePage() {
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(43,98,255,0.35),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(6,182,212,0.2),transparent_28%)]" />
       <div className="mx-auto flex w-full max-w-6xl flex-col px-4 pb-16 pt-8">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold tracking-wide text-cyan-300">{siteConfig.shortName}</p>
-          <nav className="flex items-center gap-3 text-sm text-slate-300">
-            <Link href="/models">模型</Link>
-            <Link href="/pricing">价格</Link>
-            <Link href="/cases">案例</Link>
-            <Link href="/tutorials">教程</Link>
-            <Link href="/help">帮助</Link>
-            <Link href="/chat">体验</Link>
-            <Link href="/login">登录</Link>
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-300">
+            <Link href="/models" className="hover:text-cyan-200">
+              能力
+            </Link>
+            <Link href="/pricing" className="hover:text-cyan-200">
+              价格
+            </Link>
+            <Link href="/cases" className="hover:text-cyan-200">
+              案例
+            </Link>
+            <Link href="/tutorials" className="hover:text-cyan-200">
+              教程
+            </Link>
+            <Link href="/help" className="hover:text-cyan-200">
+              帮助
+            </Link>
+            <Link href="/announcements" className="hover:text-cyan-200">
+              公告
+            </Link>
+            <Link href="/login" className="hover:text-cyan-200">
+              登录
+            </Link>
+            <Link
+              href="/register"
+              className="rounded-lg bg-cyan-500/90 px-3 py-1.5 font-medium text-slate-950 hover:bg-cyan-400"
+            >
+              注册
+            </Link>
           </nav>
         </header>
 
-        <section className="relative mt-20 grid gap-10 md:grid-cols-2 md:items-center">
-          <div>
-            <p className="inline-flex rounded-full border border-cyan-400/50 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-200">
-              中文市场 · SEO / GEO 增长友好
-            </p>
-            <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">
-              一个站点，接入主流大模型，
-              <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
-                {" "}
-                支持支付宝与微信变现
-              </span>
-            </h1>
-            <p className="mt-5 text-base text-slate-300">
-              为中文团队打造的 AI 聚合平台：统一 Key 管理、真实支付接入、后台消耗统计，帮助你更快做出可运营产品。
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link
-                href="/register"
-                className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3 text-sm font-medium text-slate-950"
-              >
-                免费注册并开始
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-xl border border-slate-600 px-5 py-3 text-sm font-medium text-slate-200"
-              >
-                账号登录
-              </Link>
-            </div>
+        <section className="relative mt-16 text-center md:mt-24">
+          <p className="text-4xl opacity-40 select-none" aria-hidden>
+            ❄
+          </p>
+          <p className="mt-4 inline-flex rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-1 text-xs text-cyan-100">
+            为中国开发者量身打造
+          </p>
+          <h1 className="mt-6 text-4xl font-semibold leading-tight tracking-tight md:text-5xl md:leading-tight">
+            <span className="bg-gradient-to-r from-cyan-200 via-white to-blue-300 bg-clip-text text-transparent">
+              AI 驱动的智能编程助手
+            </span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base text-slate-300 md:text-lg">
+            用先进的大模型能力，帮助你完成代码生成、调试优化与团队协作，让编程更高效、更智能。
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/register"
+              className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-8 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20"
+            >
+              立即使用
+            </Link>
+            <Link
+              href="/tutorials"
+              className="rounded-xl border border-slate-500 bg-slate-900/50 px-8 py-3.5 text-sm font-medium text-slate-100 backdrop-blur hover:border-cyan-400/60"
+            >
+              观看演示
+            </Link>
           </div>
-          <div className="rounded-2xl border border-slate-700/80 bg-slate-900/60 p-5 shadow-[0_0_80px_rgba(8,145,178,0.2)] backdrop-blur">
-            <p className="text-sm text-slate-300">平台能力</p>
-            <ul className="mt-4 space-y-3 text-sm text-slate-200">
-              <li>• 多模型聚合：OpenAI / Claude / Gemini / 自建网关</li>
-              <li>• 商业化支付：支付宝 + 微信支付真实下单与回调验签</li>
-              <li>• 后台可观测：Token 消耗、模型成本、订单状态</li>
-              <li>• 增长支持：中文 SEO 页面 + GEO 城市落地页</li>
-            </ul>
+          <p className="mt-4 text-xs text-slate-500">
+            视频教程与演示内容见「教程」页；产品客户端/插件接入以实际交付渠道为准。
+          </p>
+        </section>
+
+        <section className="mt-20 rounded-2xl border border-slate-700/80 bg-slate-900/50 p-8 backdrop-blur md:p-10">
+          <h2 className="text-center text-xl font-semibold md:text-2xl">强大功能，助力开发体验</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-slate-400">
+            AI 编程的革新力量——从想法到可运行代码，更快完成迭代。
+          </p>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {[
+              {
+                title: "智能代码生成",
+                desc: "根据自然语言描述生成函数、模块与测试用例，减少重复劳动。",
+              },
+              {
+                title: "调试与优化",
+                desc: "定位报错、解释堆栈、给出重构建议，让代码更清晰、更稳健。",
+              },
+              {
+                title: "实时协作",
+                desc: "适合团队评审与结对编程场景，统一上下文、加速交付。",
+              },
+            ].map((item) => (
+              <article
+                key={item.title}
+                className="rounded-2xl border border-slate-800 bg-slate-950/40 p-6 text-left shadow-[0_20px_50px_rgba(2,6,23,0.35)]"
+              >
+                <h3 className="text-lg font-medium text-cyan-100">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-400">{item.desc}</p>
+              </article>
+            ))}
           </div>
         </section>
 
-        <section className="mt-20 grid gap-4 md:grid-cols-3">
-          {[
-            {
-              title: "统一模型接入",
-              desc: "同一套接口调度不同供应商，降低切换成本和故障风险。",
-            },
-            {
-              title: "支付闭环",
-              desc: "下单、回调、订单落库全链路打通，方便直接商业化。",
-            },
-            {
-              title: "运营可视化",
-              desc: "按请求记录 Token 与费用，辅助定价和利润优化。",
-            },
-          ].map((item) => (
-            <article
-              key={item.title}
-              className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-[0_20px_50px_rgba(2,6,23,0.4)]"
+        <section className="mt-20 rounded-2xl border border-slate-700 bg-slate-900/60 p-8 text-center">
+          <h2 className="text-xl font-semibold md:text-2xl">功能演示 · 视频教程</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-slate-400">
+            从零到精通，跟着视频掌握核心能力与最佳实践。
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/tutorials"
+              className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-6 py-3 text-sm font-medium text-slate-950"
             >
-              <h2 className="text-lg font-medium">{item.title}</h2>
-              <p className="mt-2 text-sm text-slate-300">{item.desc}</p>
-            </article>
-          ))}
+              前往教程中心
+            </Link>
+            <Link href="/pricing" className="rounded-xl border border-slate-600 px-6 py-3 text-sm text-slate-200">
+              查看套餐与计费
+            </Link>
+          </div>
         </section>
 
         <section className="mt-20">
-          <h2 className="text-2xl font-semibold">GEO 城市落地页（示例）</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            这些页面可承接“城市 + AI 接口/模型聚合/中转站”的长尾搜索需求。
+          <h2 className="text-xl font-semibold md:text-2xl">城市落地页（GEO 示例）</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            便于覆盖「城市 + AI 编程助手 / 开发效率」等地域与长尾检索需求。
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {geoCities.map((city) => (
               <Link
                 key={city.slug}
                 href={`/geo/${city.slug}`}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:border-cyan-400"
+                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:border-cyan-400/70"
               >
-                {city.name} AI 中转站
+                {city.name} · 开发者方案
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="mt-20 rounded-2xl border border-slate-700 bg-slate-900/80 p-8 text-center">
-          <h2 className="text-2xl font-semibold">先上线中文站点，再扩展多语言市场</h2>
-          <p className="mt-2 text-sm text-slate-300">
-            你现在可以直接从中文流量开始，后续再加英文和其他语种内容矩阵。
+        <section className="mt-20 rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900/90 to-slate-950/90 p-8 text-center md:p-10">
+          <h2 className="text-xl font-semibold md:text-2xl">准备好提升开发效率了吗？</h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-slate-400">
+            注册账户管理充值与订单；运营与模型配置请使用管理后台。
           </p>
-          <div className="mt-6 flex justify-center gap-3">
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
-              href="/chat"
-              className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3 text-sm font-medium text-slate-950"
+              href="/register"
+              className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-6 py-3 text-sm font-medium text-slate-950"
             >
-              立即体验
+              免费注册
             </Link>
-            <Link
-              href="/pricing"
-              className="rounded-xl border border-slate-600 px-5 py-3 text-sm font-medium text-slate-200"
-            >
-              查看套餐
+            <Link href="/admin/login" className="rounded-xl border border-slate-600 px-6 py-3 text-sm text-slate-200">
+              管理后台
             </Link>
           </div>
         </section>

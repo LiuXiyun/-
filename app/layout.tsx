@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.domain),
   title: {
-    default: `${siteConfig.name}｜中文 AI 模型聚合平台`,
+    default: `${siteConfig.name}｜让代码编写更高效`,
     template: `%s｜${siteConfig.shortName}`,
   },
   description: siteConfig.description,
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: `${siteConfig.name}｜中文 AI 模型聚合平台`,
+    title: `${siteConfig.name}｜让代码编写更高效`,
     description: siteConfig.description,
     url: siteConfig.domain,
     siteName: siteConfig.name,

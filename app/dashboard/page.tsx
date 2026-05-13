@@ -6,13 +6,13 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "用户中心",
-  description: "查看余额、订单、扣费流水和会话统计。",
+  description: "查看余额、充值订单、钱包流水与邀请返佣。",
 };
 
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const [orders, transactions, sessions, invitedCount, openTickets] = await Promise.all([
+  const [orders, transactions, invitedCount, openTickets] = await Promise.all([
     prisma.rechargeOrder.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -23,7 +23,6 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
-    prisma.chatSession.count({ where: { userId: user.id } }),
     prisma.user.count({ where: { invitedById: user.id } }),
     prisma.supportTicket.count({ where: { userId: user.id, status: { in: ["OPEN", "REPLIED"] } } }),
   ]);
@@ -39,9 +38,6 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="flex gap-2 text-sm">
-            <Link href="/chat" className="rounded-lg border border-slate-600 px-3 py-2">
-              去聊天
-            </Link>
             <Link href="/invite" className="rounded-lg border border-slate-600 px-3 py-2">
               邀请返佣
             </Link>
@@ -63,10 +59,6 @@ export default async function DashboardPage() {
         <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
           <p className="text-xs text-slate-400">充值订单</p>
           <p className="mt-2 text-2xl font-semibold">{orders.length}</p>
-        </article>
-        <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
-          <p className="text-xs text-slate-400">会话数</p>
-          <p className="mt-2 text-2xl font-semibold">{sessions}</p>
         </article>
         <article className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
           <p className="text-xs text-slate-400">已邀请用户</p>

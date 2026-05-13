@@ -191,9 +191,8 @@ export async function adjustUserBalanceAction(formData: FormData) {
     });
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/dashboard");
-  revalidatePath("/chat");
+    revalidatePath("/admin");
+    revalidatePath("/dashboard");
 }
 
 export async function savePlanAction(formData: FormData) {

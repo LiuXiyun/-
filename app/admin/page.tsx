@@ -72,8 +72,8 @@ export default async function AdminPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/chat" className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-            返回聊天页
+          <Link href="/" className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            返回官网
           </Link>
           <form action={logoutAction}>
             <button className="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white">退出登录</button>

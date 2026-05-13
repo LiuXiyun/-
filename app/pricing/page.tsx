@@ -39,7 +39,7 @@ export default async function PricingPage() {
             <p className="mt-2 text-sm text-slate-300">{plan.description}</p>
             <p className="mt-1 text-xs text-slate-400">到账额度：¥{plan.creditsCny.toFixed(2)}</p>
             <Link
-              href={`/chat?plan=${plan.slug}`}
+              href={`/register?plan=${plan.slug}`}
               className="mt-3 inline-flex rounded-lg border border-cyan-400/60 px-3 py-2 text-xs text-cyan-300"
             >
               选择此套餐

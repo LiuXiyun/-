@@ -79,9 +79,6 @@ export default async function InvitePage() {
         <Link href="/dashboard" className="rounded-lg border border-slate-600 px-3 py-2">
           返回用户中心
         </Link>
-        <Link href="/chat" className="rounded-lg bg-cyan-500 px-3 py-2 font-medium text-slate-950">
-          去聊天
-        </Link>
       </footer>
     </main>
   );

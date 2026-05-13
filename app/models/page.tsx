@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "模型聚合能力",
+  title: "模型与能力",
   description:
-    "查看中文 AI 聚合站点支持的模型供应商与路由策略，包含 OpenAI、Claude、Gemini 和兼容 OpenAI 协议模型。",
+    "了解编程助手背后可调用的主流模型能力：OpenAI、Claude、Gemini 及兼容 OpenAI 协议的网关。",
   alternates: {
     canonical: "/models",
   },
@@ -21,9 +21,9 @@ export default function ModelsPage() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8 text-slate-100">
       <header className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6">
-        <h1 className="text-3xl font-semibold">模型聚合能力</h1>
+        <h1 className="text-3xl font-semibold">模型与能力说明</h1>
         <p className="mt-2 text-sm text-slate-300">
-          一个后台管理多个模型 Key，按业务场景灵活选择模型，减少切换成本。
+          运营后台可配置多供应商模型 Key，为 IDE/插件或自研客户端提供统一接入与成本统计基础。
         </p>
       </header>
 
@@ -52,8 +52,8 @@ export default function ModelsPage() {
         <Link href="/" className="rounded-lg border border-slate-600 px-3 py-2">
           返回首页
         </Link>
-        <Link href="/chat" className="rounded-lg bg-cyan-500 px-3 py-2 font-medium text-slate-950">
-          立即体验
+        <Link href="/register" className="rounded-lg bg-cyan-500 px-3 py-2 font-medium text-slate-950">
+          立即注册
         </Link>
       </footer>
     </main>

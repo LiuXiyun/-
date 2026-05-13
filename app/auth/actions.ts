@@ -82,7 +82,7 @@ export async function registerAction(formData: FormData) {
   });
 
   await createUserSession(user.id);
-  redirect("/chat");
+  redirect("/dashboard");
 }
 
 export async function loginAction(formData: FormData) {
@@ -98,7 +98,7 @@ export async function loginAction(formData: FormData) {
   }
 
   await createUserSession(user.id);
-  redirect("/chat");
+  redirect("/dashboard");
 }
 
 export async function logoutUserAction() {
